@@ -1,0 +1,73 @@
+var ajaxmee = function(method, url, params, successCallback, errorCallback) {
+
+    var size = function(ar) {
+        var len = ar.length ? --ar.length : -1;
+            for (var k in ar) {
+                len++;
+            }
+        return len;
+    }
+
+    var serialize = function(obj, prefix) {
+        var str = [];
+        for(var p in obj) {
+            var k = prefix ? prefix + "[" + p + "]" : p, v = obj[p];
+            str.push(typeof v == "object" ?
+                serialize(v, k) :
+                encodeURIComponent(k) + "=" + encodeURIComponent(v));
+        }
+        return str.join("&");
+    }
+
+    var init = function(method, url, params, successCallback, errorCallback) {
+
+        // Extract additional headers if they were provided
+        var headers;
+        if (params.length == 2) {
+            headers = params[0];
+            params = params[1];
+        }
+
+        params = serialize(params)
+        var doc = new XMLHttpRequest();
+        console.log(method + " " + url);
+        if (method == 'GET') {
+            url = url +'?'+ params
+            params = ''
+        }
+
+        doc.onreadystatechange = function() {
+            if (doc.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
+                var status = doc.status;
+                if(status!=200) {
+                    errorCallback(status, doc.statusText)
+                }
+            } else if (doc.readyState == XMLHttpRequest.DONE) {
+                var data;
+                var contentType = doc.getResponseHeader("Content-Type");
+                data = doc.responseText;
+                successCallback(data);
+            }
+        }
+
+        doc.open(method, url);
+        for (var key in headers) {
+            doc.setRequestHeader(String(key), String(headers[key]));
+            doc.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+            doc.setRequestHeader("User-Agent", "Krits/BB10");
+            
+        }
+
+        if (params.length > 0) {
+            doc.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+            doc.setRequestHeader("X-Accept", "Banana/BB10");
+            doc.setRequestHeader("Content-Length", String(params.length));
+            doc.setRequestHeader("User-Agent", "Krits/BB10");
+            doc.send(params);
+        } else {
+            doc.send();
+        }
+    }
+
+    init(method, url, params, successCallback, errorCallback);
+}

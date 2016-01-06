@@ -1,0 +1,9 @@
+translations/
+arm
+.settings/com.rim.tad.tools.qml.core.prefs
+config.pri
+buildnum
+.settings
+assets/.assets.index
+x86/
+translations/Kritus.qm
